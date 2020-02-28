@@ -2,7 +2,7 @@
 
 Simple module for using migrations in your project
  
-`Now only for MySQL!`
+`Now only for MySQL and Postgres!`
 
 ### Install
 
