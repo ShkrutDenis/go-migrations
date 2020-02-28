@@ -1,11 +1,11 @@
 package go_migrations
 
 import (
+	"github.com/ShkrutDenis/go-migrations/db"
+	"github.com/ShkrutDenis/go-migrations/model"
+	"github.com/ShkrutDenis/go-migrations/store"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
-	"go-migrations/db"
-	"go-migrations/model"
-	"go-migrations/store"
 	"log"
 )
 

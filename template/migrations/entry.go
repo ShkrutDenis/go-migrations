@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	gm "go-migrations"
-	gmStore "go-migrations/store"
-	"go-migrations/template/migrations/list"
+	gm "github.com/ShkrutDenis/go-migrations"
+	gmStore "github.com/ShkrutDenis/go-migrations/store"
+	"github.com/ShkrutDenis/go-migrations/template/migrations/list"
 )
 
 var isRollback *bool

@@ -18,4 +18,5 @@ Run this command for put to your project the template for usage go-migrations:
 ```
 
 In `migrations/list` directory create your migrations like existed example
+
 In `migrations/entry.go` in `getMigrationsList()` method put your migrations structures
