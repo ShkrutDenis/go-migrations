@@ -1,1 +1,1 @@
-cp -a "$GOPATH"/src/go-migrations/template/. ./test/
+cp -a "$GOPATH"/src/go-migrations/template/. ./

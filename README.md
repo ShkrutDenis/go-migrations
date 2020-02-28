@@ -10,11 +10,17 @@ Simple module for using migrations in your project
     go get github.com/ShkrutDenis/go-migrations
 ```
 
+for update use flag `-u`:
+
+```
+    go get -u github.com/ShkrutDenis/go-migrations
+```
+
 ### Usage
 
 Run this command for put to your project the template for usage go-migrations:
 ```
-    bash $GOPATH/github.com/ShkrutDenis/go-migrations/init.sh
+    bash $GOPATH/src/github.com/ShkrutDenis/go-migrations/init.sh
 ```
 
 In `migrations/list` directory create your migrations like existed example
