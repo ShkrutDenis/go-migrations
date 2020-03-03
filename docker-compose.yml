@@ -1,0 +1,13 @@
+version: "3.7"
+services:
+  mysql:
+    container_name: migrations-mysql
+    image: mysql:8
+    ports:
+      - 33063:3306
+    env_file: .env
+    environment:
+      - MYSQL_ROOT_PASSWORD=${DB_PASSWORD}
+      - MYSQL_DATABASE=${DB_NAME}
+      - MYSQL_USER=${DB_USER}
+      - MYSQL_PASSWORD=${DB_PASSWORD}
