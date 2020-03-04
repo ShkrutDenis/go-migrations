@@ -19,7 +19,8 @@ func init() {
 		log.Println("Error loading .env file")
 	}
 
-	connection, err = db.Connect()
+	connector := db.NewConnector()
+	connection, err = connector.Connect()
 	if err != nil {
 		log.Fatal(err)
 	}

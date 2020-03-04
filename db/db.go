@@ -9,35 +9,82 @@ import (
 	"strings"
 )
 
-type connectionStringProvider func() string
-
-var connectionProvider map[string]connectionStringProvider = map[string]connectionStringProvider{
-	"mysql":    getMysqlConnectionString,
-	"postgres": getPostgresConnectionString,
+type Connector struct {
+	config     *ConnectionConfig
+	driver     string
+	connection *sqlx.DB
 }
 
-func Connect() (*sqlx.DB, error) {
-	connectionStringProvider, ok := connectionProvider[os.Getenv("DB_DRIVER")]
+type ConnectionConfig struct {
+	user       string
+	password   string
+	connection string
+	host       string
+	port       string
+	name       string
+}
+
+func NewConnector() *Connector {
+	config := NewConfig()
+	return &Connector{
+		config: config,
+		driver: os.Getenv("DB_DRIVER"),
+	}
+}
+
+func NewConfig() *ConnectionConfig {
+	var host, port string
+	connectionParts := strings.Split(":", os.Getenv("DB_CONNECTION"))
+	if len(connectionParts) == 2 {
+		host, port = connectionParts[0], connectionParts[1]
+	}
+
+	return &ConnectionConfig{
+		user:       os.Getenv("DB_USER"),
+		password:   os.Getenv("DB_PASSWORD"),
+		connection: os.Getenv("DB_CONNECTION"),
+		host:       host,
+		port:       port,
+		name:       os.Getenv("DB_NAME"),
+	}
+}
+
+func (c *Connector) Connect() (*sqlx.DB, error) {
+	connectionString, ok := c.getConnectionString()
 	if !ok {
 		return nil, errors.New("driver was not provided")
 	}
-
-	return sqlx.Connect(os.Getenv("DB_DRIVER"), connectionStringProvider())
+	return sqlx.Connect(os.Getenv("DB_DRIVER"), connectionString)
 }
 
-func getMysqlConnectionString() string {
-	dbUser, dbPass, dbHost, dbName := os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_CONNECTION"), os.Getenv("DB_NAME")
-	return fmt.Sprintf("%v:%v@tcp(%v)/%v?parseTime=true", dbUser, dbPass, dbHost, dbName)
-}
-
-func getPostgresConnectionString() string {
-	connectionParts := strings.Split(":", os.Getenv("DB_CONNECTION"))
-	if len(connectionParts) < 2 {
-		return ""
+func (c *Connector) Close() error {
+	if c.connection != nil {
+		return c.connection.Close()
 	}
+	return errors.New("connection not exist")
+}
 
-	dbHost, dbPort := connectionParts[0], connectionParts[1]
-	dbUser, dbPass, dbName := os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_NAME")
+func (c *Connector) ChangeDB(dbName string) {
+	c.config.name = dbName
+}
 
-	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable", dbHost, dbPort, dbUser, dbPass, dbName)
+func (c *Connector) getConnectionString() (string, bool) {
+	switch c.driver {
+	case "mysql":
+		return c.getMysqlConnectionString(), true
+	case "postgres":
+		return c.getPostgresConnectionString(), true
+	default:
+		return "", false
+	}
+}
+
+func (c *Connector) getMysqlConnectionString() string {
+	return fmt.Sprintf("%v:%v@tcp(%v)/%v?parseTime=true",
+		c.config.user, c.config.password, c.config.connection, c.config.name)
+}
+
+func (c *Connector) getPostgresConnectionString() string {
+	return fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
+		c.config.host, c.config.port, c.config.user, c.config.password, c.config.name)
 }
