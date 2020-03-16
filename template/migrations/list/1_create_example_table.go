@@ -16,10 +16,12 @@ func (m *CreateExampleTable) Up(con *sqlx.DB) {
 	// Write your migration logic here
 	// Example:
 	// 	con.MustExec("CREATE TABLE example ( id int auto_increment, constraint migrations_pk primary key (id));")
+	// Or you can use existed query builder
 }
 
 func (m *CreateExampleTable) Down(con *sqlx.DB) {
 	// Write your migration rollback logic here
 	// Example:
 	// 	con.MustExec("DROP TABLE example;")
+	// Or you can use existed query builder
 }
