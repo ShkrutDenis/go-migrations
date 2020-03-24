@@ -36,11 +36,11 @@ type Column struct {
 func NewColumn(table, fieldName string, con *sqlx.DB) *Column {
 	ci := info.GetColumnInfo(table, fieldName, con)
 	c := &Column{name: fieldName, info: ci}
-	c.Init()
+	c.init()
 	return c
 }
 
-func (c *Column) Init() *Column {
+func (c *Column) init() *Column {
 	if c.info != nil {
 		c.fieldType = c.info.ColumnType
 		if c.info.Nullable() {
