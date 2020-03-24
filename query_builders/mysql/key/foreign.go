@@ -2,7 +2,7 @@ package key
 
 import (
 	"fmt"
-	"github.com/ShkrutDenis/go-migrations/query_builders/mysql_builder/info"
+	"github.com/ShkrutDenis/go-migrations/query_builders/mysql/info"
 )
 
 type ForeignKey struct {

@@ -2,9 +2,9 @@ package table
 
 import (
 	"fmt"
-	"github.com/ShkrutDenis/go-migrations/query_builders/mysql_builder/column"
-	"github.com/ShkrutDenis/go-migrations/query_builders/mysql_builder/info"
-	"github.com/ShkrutDenis/go-migrations/query_builders/mysql_builder/key"
+	"github.com/ShkrutDenis/go-migrations/query_builders/mysql/column"
+	"github.com/ShkrutDenis/go-migrations/query_builders/mysql/info"
+	"github.com/ShkrutDenis/go-migrations/query_builders/mysql/key"
 	"github.com/jmoiron/sqlx"
 	"strconv"
 	"strings"
