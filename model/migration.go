@@ -33,7 +33,7 @@ func GetLastBatch(connection *sqlx.DB) int {
 
 func GetLastMigrations(connection *sqlx.DB, lastBatch int) []*Migration {
 	var list []*Migration
-	_ = connection.Select(&list, "SELECT * FROM migrations WHERE batch=? ORDER BY created_at DESC;", lastBatch)
+	_ = connection.Select(&list, "SELECT * FROM migrations WHERE batch=? ORDER BY created_at DESC, id DESC;", lastBatch)
 	return list
 }
 
