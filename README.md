@@ -1,6 +1,6 @@
 ## Overview
 
-Simple module for using migrations in your project
+A simple module for using migrations in your project
  
 `Now only for MySQL and Postgres!`
 
@@ -21,15 +21,30 @@ for update use flag `-u`:
 Run this command for put to your project the template for usage go-migrations:
 ```
     bash $GOPATH/src/github.com/ShkrutDenis/go-migrations/init.sh
+    or if you use vendor folder
+    bash vendor/github.com/ShkrutDenis/go-migrations/init.sh
+```
+
+Or you can copy sources from your dependencies path manually if you have trouble with command.
+For example from:
+```
+    .../github.com/ShkrutDenis/go-migrations/template
 ```
 
 In `migrations/list` directory create your migrations like existed example
 
 In `migrations/entry.go` in `getMigrationsList()` method put your migrations structures
 
+For migrate:
+```
+    go run migrations/entry.go
+```
+
+If you want to rollback, add `--rollback` flag.
+
 #### Environment variables
 
-Module use next variables for creating a connection with DB:
+Module uses next variables for creating a connection with DB:
 
 - DB_DRIVER
 - DB_USER

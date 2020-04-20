@@ -2,6 +2,7 @@ package key
 
 import (
 	"fmt"
+	"github.com/ShkrutDenis/go-migrations/builder/contract"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -13,22 +14,22 @@ type UniqueKey struct {
 	drop bool
 }
 
-func NewUniqueKey(table, field string) *UniqueKey {
+func NewUniqueKey(table, field string) contract.UniqueKey {
 	uk := &UniqueKey{table: table, field: field}
 	return uk
 }
 
-func (uk *UniqueKey) SetKeyName(name string) *UniqueKey {
+func (uk *UniqueKey) SetKeyName(name string) contract.UniqueKey {
 	uk.name = name
 	return uk
 }
 
-func (uk *UniqueKey) GenerateKeyName() *UniqueKey {
+func (uk *UniqueKey) GenerateKeyName() contract.UniqueKey {
 	uk.name = fmt.Sprintf("%v_%v_uindex", uk.table, uk.field)
 	return uk
 }
 
-func (uk *UniqueKey) Drop() *UniqueKey {
+func (uk *UniqueKey) Drop() contract.UniqueKey {
 	uk.drop = true
 	return uk
 }
