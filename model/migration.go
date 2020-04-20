@@ -58,6 +58,7 @@ func RemoveLastBatch(connection *sqlx.DB, lastBatch int) {
 	connection.MustExec(removeBatchSQL(), lastBatch)
 }
 
+// SQL queries functions
 func checkTableExitSQL() string {
 	switch os.Getenv("DB_DRIVER") {
 	case "mysql":

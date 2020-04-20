@@ -54,3 +54,5 @@ Module uses next variables for creating a connection with DB:
 - DB_NAME
 
 if `DB_HOST` and `DB_PORT` doesn’t exist, will be used a `DB_CONNECTION` with next format: `host:port`
+
+By default, module load env file from the current directory with name `.env`. For use custom env file you can use next flags: `--env-path` and `--env-file`
