@@ -34,10 +34,13 @@ func NewConnector() *Connector {
 }
 
 func NewConfig() *ConnectionConfig {
-	var host, port string
-	connectionParts := strings.Split(os.Getenv("DB_CONNECTION"), ":")
-	if len(connectionParts) == 2 {
-		host, port = connectionParts[0], connectionParts[1]
+	host := os.Getenv("DB_HOST")
+	port := os.Getenv("DB_PORT")
+	if host == "" && port == "" {
+		connectionParts := strings.Split(os.Getenv("DB_CONNECTION"), ":")
+		if len(connectionParts) == 2 {
+			host, port = connectionParts[0], connectionParts[1]
+		}
 	}
 
 	return &ConnectionConfig{
