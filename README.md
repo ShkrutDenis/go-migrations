@@ -49,5 +49,8 @@ Module uses next variables for creating a connection with DB:
 - DB_DRIVER
 - DB_USER
 - DB_PASSWORD
-- DB_CONNECTION - format `host:port`
+- DB_HOST
+- DB_PORT
 - DB_NAME
+
+if `DB_HOST` and `DB_PORT` doesn’t exist, will be used a `DB_CONNECTION` with next format: `host:port`
