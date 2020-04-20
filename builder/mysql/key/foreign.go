@@ -2,7 +2,8 @@ package key
 
 import (
 	"fmt"
-	"github.com/ShkrutDenis/go-migrations/query_builders/mysql/info"
+	"github.com/ShkrutDenis/go-migrations/builder/contract"
+	"github.com/ShkrutDenis/go-migrations/builder/mysql/info"
 )
 
 type ForeignKey struct {
@@ -18,11 +19,11 @@ type ForeignKey struct {
 	change string
 }
 
-func NewForeignKey(table, baseColumn string) *ForeignKey {
+func NewForeignKey(table, baseColumn string) contract.ForeignKey {
 	return &ForeignKey{baseTable: table, baseColumn: baseColumn, onDelete: "restrict", onUpdate: "restrict"}
 }
 
-func NewForeignKeyByKeyInfo(ki *info.KeyInfo) *ForeignKey {
+func NewForeignKeyByKeyInfo(ki *info.KeyInfo) contract.ForeignKey {
 	return &ForeignKey{
 		name:         ki.ConstraintName,
 		baseTable:    ki.TableName,
@@ -32,37 +33,37 @@ func NewForeignKeyByKeyInfo(ki *info.KeyInfo) *ForeignKey {
 	}
 }
 
-func (fk *ForeignKey) Reference(table string) *ForeignKey {
+func (fk *ForeignKey) Reference(table string) contract.ForeignKey {
 	fk.targetTable = table
 	return fk
 }
 
-func (fk *ForeignKey) On(field string) *ForeignKey {
+func (fk *ForeignKey) On(field string) contract.ForeignKey {
 	fk.targetColumn = field
 	return fk
 }
 
-func (fk *ForeignKey) OnUpdate(action string) *ForeignKey {
+func (fk *ForeignKey) OnUpdate(action string) contract.ForeignKey {
 	fk.onUpdate = action
 	return fk
 }
 
-func (fk *ForeignKey) OnDelete(action string) *ForeignKey {
+func (fk *ForeignKey) OnDelete(action string) contract.ForeignKey {
 	fk.onDelete = action
 	return fk
 }
 
-func (fk *ForeignKey) Drop() *ForeignKey {
+func (fk *ForeignKey) Drop() contract.ForeignKey {
 	fk.drop = true
 	return fk
 }
 
-func (fk *ForeignKey) SetKeyName(name string) *ForeignKey {
+func (fk *ForeignKey) SetKeyName(name string) contract.ForeignKey {
 	fk.name = name
 	return fk
 }
 
-func (fk *ForeignKey) GenerateKeyName() *ForeignKey {
+func (fk *ForeignKey) GenerateKeyName() contract.ForeignKey {
 	fk.name = fmt.Sprintf("%v_%v_%v_fk", fk.baseTable, fk.targetTable, fk.targetColumn)
 	return fk
 }
