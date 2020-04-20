@@ -55,17 +55,9 @@ func rollBack() {
 }
 
 func upOrIgnore(migration store.Migratable) {
-	var raw model.Migration
-	var err error
-	if firstRun {
-		goto run
+	if !firstRun && model.MigrationExist(connection, migration.GetName()) {
+		return
 	}
-	err = connection.Get(&raw, "SELECT * FROM migrations WHERE name=?", migration.GetName())
-	if err != nil {
-		goto run
-	}
-	return
-run:
 	log.Println("Migrating", migration.GetName())
 	migration.Up(connection)
 	model.AddMigrationRaw(connection, migration.GetName(), lastBatch+1)

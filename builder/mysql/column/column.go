@@ -2,7 +2,8 @@ package column
 
 import (
 	"fmt"
-	"github.com/ShkrutDenis/go-migrations/query_builders/mysql/info"
+	"github.com/ShkrutDenis/go-migrations/builder/contract"
+	"github.com/ShkrutDenis/go-migrations/builder/mysql/info"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -24,6 +25,8 @@ type Column struct {
 	unique       bool
 	hasUniqueKey bool
 
+	isPrimaryKey bool
+
 	drop   bool
 	change bool
 	first  bool
@@ -33,14 +36,14 @@ type Column struct {
 	info *info.ColumnInfo
 }
 
-func NewColumn(table, fieldName string, con *sqlx.DB) *Column {
+func NewColumn(table, fieldName string, con *sqlx.DB) contract.Column {
 	ci := info.GetColumnInfo(table, fieldName, con)
 	c := &Column{name: fieldName, info: ci}
 	c.init()
 	return c
 }
 
-func (c *Column) init() *Column {
+func (c *Column) init() contract.Column {
 	if c.info != nil {
 		c.fieldType = c.info.ColumnType
 		if c.info.Nullable() {
@@ -57,68 +60,73 @@ func (c *Column) init() *Column {
 }
 
 // Functions for modify table
-func (c *Column) Type(fieldType string) *Column {
+func (c *Column) Type(fieldType string) contract.Column {
 	c.fieldType = fieldType
 	return c
 }
 
-func (c *Column) Nullable() *Column {
+func (c *Column) Nullable() contract.Column {
 	c.nullable = null
 	return c
 }
 
-func (c *Column) NotNull() *Column {
+func (c *Column) NotNull() contract.Column {
 	c.nullable = notNull
 	return c
 }
 
-func (c *Column) Autoincrement() *Column {
+func (c *Column) Autoincrement() contract.Column {
 	c.autoincrement = true
 	return c
 }
 
-func (c *Column) NotAutoincrement() *Column {
+func (c *Column) NotAutoincrement() contract.Column {
 	c.autoincrement = false
 	return c
 }
 
-func (c *Column) Default(value string) *Column {
+func (c *Column) Default(value string) contract.Column {
 	c.hasDefault = value != ""
 	c.defaultValue = value
 	return c
 }
 
-func (c *Column) Unique() *Column {
+func (c *Column) Primary() contract.Column {
+	c.isPrimaryKey = true
+	return c
+}
+
+func (c *Column) Unique() contract.Column {
 	c.unique = true
 	return c
 }
 
-func (c *Column) NotUnique() *Column {
+func (c *Column) NotUnique() contract.Column {
 	c.unique = false
 	return c
 }
 
-func (c *Column) Drop() *Column {
+func (c *Column) Drop() contract.Column {
 	c.drop = true
 	return c
 }
 
-func (c *Column) Change() *Column {
+func (c *Column) Change() contract.Column {
 	c.change = true
 	return c
 }
 
-func (c *Column) First() *Column {
+func (c *Column) First() contract.Column {
 	c.first = true
 	return c
 }
 
-func (c *Column) After(name string) *Column {
+func (c *Column) After(name string) contract.Column {
 	c.after = name
 	return c
 }
 
-func (c *Column) Rename(name string) *Column {
+func (c *Column) Rename(name string) contract.Column {
 	c.rename = name
 	return c
 }
@@ -149,20 +157,21 @@ func (c *Column) changeColumnSQL() string {
 }
 
 func (c *Column) renameColumnSQL() string {
-	sql := fmt.Sprintf("change column %v %v", c.name, c.rename)
-	sql += c.columnOptionsSQL()
-	sql += c.columnPositionSQL()
-	return sql + ";"
+	return fmt.Sprintf("change column %v %v;", c.name, c.rename)
 }
 
 func (c *Column) dropColumnSQL() string {
-	return fmt.Sprintf("drop column %v;", c.name)
+	return fmt.Sprintf("drop column %v,", c.name)
 }
 
 func (c *Column) columnOptionsSQL() string {
 	sql := " " + c.fieldType
 	if c.hasDefault {
-		sql += " default " + c.defaultValue
+		if c.fieldType != "bool" && c.fieldType != "boolean" {
+			sql += fmt.Sprintf(" default '%v'", c.defaultValue)
+		} else {
+			sql += fmt.Sprintf(" default %v", c.defaultValue)
+		}
 	}
 	if c.autoincrement {
 		sql += " auto_increment"
@@ -199,6 +208,10 @@ func (c *Column) GetUniqueKeyName() string {
 		return ""
 	}
 	return k.KeyName
+}
+
+func (c *Column) IsPrimary() bool {
+	return c.isPrimaryKey
 }
 
 func (c *Column) IsUnique() bool {
