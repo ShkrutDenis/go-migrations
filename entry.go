@@ -2,47 +2,22 @@ package go_migrations
 
 import (
 	"flag"
+	"github.com/ShkrutDenis/go-migrations/config"
 	"github.com/ShkrutDenis/go-migrations/db"
 	"github.com/ShkrutDenis/go-migrations/model"
 	"github.com/ShkrutDenis/go-migrations/store"
 	"github.com/jmoiron/sqlx"
 	"github.com/joho/godotenv"
 	"log"
-	"os"
 )
 
 var connection *sqlx.DB
-var config *Config
-
-type Config struct {
-	IsRollback bool
-	EnvPath    string
-	EnvFile    string
-
-	lastBatch int
-	firstRun  bool
-}
-
-func (c *Config) GetEnvFullPath() string {
-	if c.EnvPath == "" {
-		return c.EnvFile
-	}
-	_, err := os.Stat(c.EnvPath + "/" + c.EnvFile)
-	if os.IsNotExist(err) {
-		return c.EnvPath + "\\" + c.EnvFile
-	}
-	return c.EnvPath + "/" + c.EnvFile
-}
-
-func init() {
-	config = &Config{}
-}
 
 func Run(migs []store.Migratable) {
 	parseFlags()
 	prepare()
 
-	if config.IsRollback {
+	if config.GetConfig().IsRollback {
 		store.RegisterMigrations(migs)
 		rollBack()
 		return
@@ -54,7 +29,7 @@ func Run(migs []store.Migratable) {
 }
 
 func rollBack() {
-	forRollback := model.GetLastMigrations(connection, config.lastBatch)
+	forRollback := model.GetLastMigrations(connection, config.GetConfig().LastBatch)
 	for _, m := range forRollback {
 		forRun := store.FindMigration(m.Name)
 		if forRun == nil {
@@ -64,16 +39,16 @@ func rollBack() {
 		forRun.Down(connection)
 		log.Println("Rolled back", forRun.GetName())
 	}
-	model.RemoveLastBatch(connection, config.lastBatch)
+	model.RemoveLastBatch(connection, config.GetConfig().LastBatch)
 }
 
 func upOrIgnore(migration store.Migratable) {
-	if !config.firstRun && model.MigrationExist(connection, migration.GetName()) {
+	if !config.GetConfig().FirstRun && model.MigrationExist(connection, migration.GetName()) {
 		return
 	}
 	log.Println("Migrating", migration.GetName())
 	migration.Up(connection)
-	model.AddMigrationRaw(connection, migration.GetName(), config.lastBatch+1)
+	model.AddMigrationRaw(connection, migration.GetName(), config.GetConfig().LastBatch+1)
 	log.Println("Migrated", migration.GetName())
 }
 
@@ -81,14 +56,19 @@ func parseFlags() {
 	isRollback := flag.Bool("rollback", false, "Flag for init rollback.")
 	envPath := flag.String("env-path", "", "Path to .env file.")
 	envFile := flag.String("env-file", ".env", "Env file name.")
+	verbose := flag.Bool("verbose", false, "Flag for show more info.")
 	flag.Parse()
-	config.IsRollback = *isRollback
-	config.EnvPath = *envPath
-	config.EnvFile = *envFile
+	config.GetConfig().IsRollback = *isRollback
+	config.GetConfig().EnvPath = *envPath
+	config.GetConfig().EnvFile = *envFile
+	config.GetConfig().Verbose = *verbose
 }
 
 func prepare() {
-	err := godotenv.Load(config.GetEnvFullPath())
+	if config.GetConfig().Verbose {
+		log.Println("load env file from:", config.GetConfig().GetEnvFullPath())
+	}
+	err := godotenv.Load(config.GetConfig().GetEnvFullPath())
 	if err != nil {
 		log.Println("Error loading .env file")
 	}
@@ -98,6 +78,6 @@ func prepare() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	config.lastBatch = model.GetLastBatch(connection)
-	config.firstRun = model.CreateMigrationsTable(connection)
+	config.GetConfig().LastBatch = model.GetLastBatch(connection)
+	config.GetConfig().FirstRun = model.CreateMigrationsTable(connection)
 }

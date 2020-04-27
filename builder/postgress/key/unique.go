@@ -3,6 +3,7 @@ package key
 import (
 	"fmt"
 	"github.com/ShkrutDenis/go-migrations/builder/contract"
+	"github.com/ShkrutDenis/go-migrations/config"
 	"github.com/jmoiron/sqlx"
 	"log"
 )
@@ -47,12 +48,17 @@ func (uk *UniqueKey) GetSQL() string {
 }
 
 func (uk *UniqueKey) Exec(con *sqlx.DB) error {
+	if config.GetConfig().Verbose {
+		log.Println(uk.GetSQL())
+	}
 	_, err := con.Exec(uk.GetSQL())
 	return err
 }
 
 func (uk *UniqueKey) MustExec(con *sqlx.DB) {
-	log.Println(uk.GetSQL())
+	if config.GetConfig().Verbose {
+		log.Println(uk.GetSQL())
+	}
 	con.MustExec(uk.GetSQL())
 }
 
