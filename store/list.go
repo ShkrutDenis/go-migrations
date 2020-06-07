@@ -26,3 +26,15 @@ func FindMigration(name string) Migratable {
 	}
 	return nil
 }
+
+func FilterMigrations(name string) []Migratable {
+	if list[len(list)].GetName() == name {
+		return []Migratable{}
+	}
+	for i, m := range list {
+		if m.GetName() == name {
+			return list[i+1:]
+		}
+	}
+	return list
+}

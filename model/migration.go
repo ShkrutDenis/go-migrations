@@ -35,15 +35,18 @@ func MigrationExist(connection *sqlx.DB, name string) bool {
 	return true
 }
 
-func GetLastBatch(connection *sqlx.DB) int {
+func GetLastMigration(connection *sqlx.DB) (bool, *Migration) {
 	var raw Migration
-	_ = connection.Get(&raw, getLastBatchSQL())
-	return raw.Batch
+	err := connection.Get(&raw, getLastRawSQL())
+	if err != nil {
+		return false, &raw
+	}
+	return true, &raw
 }
 
 func GetLastMigrations(connection *sqlx.DB, lastBatch int) []*Migration {
 	var list []*Migration
-	err := connection.Select(&list, getLastRawSQL(), lastBatch)
+	err := connection.Select(&list, getLastRawsSQL(), lastBatch)
 	if err != nil {
 		panic(err)
 	}
@@ -52,6 +55,12 @@ func GetLastMigrations(connection *sqlx.DB, lastBatch int) []*Migration {
 
 func RemoveMigrationRaw(connection *sqlx.DB, migration string) {
 	connection.MustExec(removeMigrationSQL(), migration)
+}
+
+func GetLastBatch(connection *sqlx.DB) int {
+	var raw Migration
+	_ = connection.Get(&raw, getLastBatchSQL())
+	return raw.Batch
 }
 
 func RemoveLastBatch(connection *sqlx.DB, lastBatch int) {
@@ -103,6 +112,17 @@ func addRawSQL() string {
 	}
 }
 
+func getLastRawSQL() string {
+	switch os.Getenv("DB_DRIVER") {
+	case "mysql":
+		return "SELECT * FROM migrations ORDER BY created_at DESC, id DESC LIMIT 1;"
+	case "postgres":
+		return "SELECT * FROM migrations ORDER BY created_at DESC, id DESC LIMIT 1;"
+	default:
+		panic("Not supported DB driver: " + os.Getenv("DB_DRIVER"))
+	}
+}
+
 func getLastBatchSQL() string {
 	switch os.Getenv("DB_DRIVER") {
 	case "mysql":
@@ -114,7 +134,7 @@ func getLastBatchSQL() string {
 	}
 }
 
-func getLastRawSQL() string {
+func getLastRawsSQL() string {
 	switch os.Getenv("DB_DRIVER") {
 	case "mysql":
 		return "SELECT * FROM migrations WHERE batch=? ORDER BY created_at DESC, id DESC;"

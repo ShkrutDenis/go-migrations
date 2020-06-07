@@ -17,15 +17,20 @@ func Run(migs []store.Migratable) {
 	parseFlags()
 	prepare()
 
+	store.RegisterMigrations(migs)
+
 	if config.GetConfig().IsRollback {
-		store.RegisterMigrations(migs)
 		rollBack()
 		return
 	}
 
-	for _, m := range migs {
-		upOrIgnore(m)
+	if !config.GetConfig().FirstRun {
+		ok, m := model.GetLastMigration(connection)
+		if ok {
+			store.FilterMigrations(m.Name)
+		}
 	}
+	up()
 }
 
 func rollBack() {
@@ -42,14 +47,13 @@ func rollBack() {
 	model.RemoveLastBatch(connection, config.GetConfig().LastBatch)
 }
 
-func upOrIgnore(migration store.Migratable) {
-	if !config.GetConfig().FirstRun && model.MigrationExist(connection, migration.GetName()) {
-		return
+func up() {
+	for _, m := range store.GetMigrationsList() {
+		log.Println("Migrating", m.GetName())
+		m.Up(connection)
+		model.AddMigrationRaw(connection, m.GetName(), config.GetConfig().LastBatch+1)
+		log.Println("Migrated", m.GetName())
 	}
-	log.Println("Migrating", migration.GetName())
-	migration.Up(connection)
-	model.AddMigrationRaw(connection, migration.GetName(), config.GetConfig().LastBatch+1)
-	log.Println("Migrated", migration.GetName())
 }
 
 func parseFlags() {
