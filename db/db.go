@@ -46,7 +46,6 @@ func NewConfig() *ConnectionConfig {
 	return &ConnectionConfig{
 		user:       os.Getenv("DB_USER"),
 		password:   os.Getenv("DB_PASSWORD"),
-		connection: os.Getenv("DB_CONNECTION"),
 		host:       host,
 		port:       port,
 		name:       os.Getenv("DB_NAME"),
@@ -84,8 +83,8 @@ func (c *Connector) getConnectionString() (string, bool) {
 }
 
 func (c *Connector) getMysqlConnectionString() string {
-	return fmt.Sprintf("%v:%v@tcp(%v)/%v?parseTime=true",
-		c.config.user, c.config.password, c.config.connection, c.config.name)
+	return fmt.Sprintf("%v:%v@tcp(%v:%v)/%v?parseTime=true",
+		c.config.user, c.config.password, c.config.host, c.config.port, c.config.name)
 }
 
 func (c *Connector) getPostgresConnectionString() string {
