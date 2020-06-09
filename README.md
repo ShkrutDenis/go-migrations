@@ -57,6 +57,14 @@ if `DB_HOST` and `DB_PORT` doesn’t exist, will be used a `DB_CONNECTION` with 
 
 By default, module load env file from the current directory with name `.env`. For use custom env file you can use next flags: `--env-path` and `--env-file`
 
-#### Examples
+### Documentation
 
-You can found few examples with create migration in `/examples` repository folder.
+You can found documentation [here](https://github.com/ShkrutDenis/go-migrations/tree/master/docs).
+
+### Examples
+
+You can found few examples with create migrations [here](https://github.com/ShkrutDenis/go-migrations/tree/master/examples).
+
+### License
+
+Licensed under [MIT License](https://github.com/ShkrutDenis/go-migrations/blob/master/LICENSE)
