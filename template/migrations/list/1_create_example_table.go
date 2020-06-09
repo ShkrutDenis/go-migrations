@@ -17,8 +17,9 @@ func (m *CreateExampleTable) Up(con *sqlx.DB) {
 	// Example:
 	// 	con.MustExec("CREATE TABLE example ( id int auto_increment, constraint migrations_pk primary key (id));")
 	// Or you can use existed query builder:
-	//  import "github.com/ShkrutDenis/go-migrations/builder"
-	//  builder.NewTable("example", con)
+	//  table := builder.NewTable("example", con)
+	//  table.String("column", 255)
+	//  table.MustExec()
 }
 
 func (m *CreateExampleTable) Down(con *sqlx.DB) {
@@ -26,6 +27,5 @@ func (m *CreateExampleTable) Down(con *sqlx.DB) {
 	// Example:
 	// 	con.MustExec("DROP TABLE example;")
 	// Or you can use existed query builder:
-	//  import "github.com/ShkrutDenis/go-migrations/builder"
-	//  builder.NewTable("example", con)
+	//   builder.DropTable("example", con).MustExec()
 }

@@ -1,6 +1,6 @@
 ## Overview
 
-A simple module for using migrations in your project
+Module for the creating migrations for GoLang applications.
  
 `Now only for MySQL and Postgres!`
 
