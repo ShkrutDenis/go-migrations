@@ -27,14 +27,13 @@ func FindMigration(name string) Migratable {
 	return nil
 }
 
-func FilterMigrations(name string) []Migratable {
+func FilterMigrations(name string) {
 	if list[len(list)-1].GetName() == name {
-		return []Migratable{}
+		list = []Migratable{}
 	}
 	for i, m := range list {
 		if m.GetName() == name {
-			return list[i+1:]
+			list = list[i+1:]
 		}
 	}
-	return list
 }
