@@ -20,7 +20,7 @@ for update use flag `-u`:
 
 Run this command for put to your project the template for usage go-migrations:
 ```
-    bash $GOPATH/src/github.com/ShkrutDenis/go-migrations/init.sh
+    bash $GOPATH/github.com/ShkrutDenis/go-migrations/init.sh
     or if you use vendor folder
     bash vendor/github.com/ShkrutDenis/go-migrations/init.sh
 ```
