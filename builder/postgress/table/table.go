@@ -157,7 +157,7 @@ func (t *Table) changeTableSQL() string {
 	base := "ALTER TABLE " + t.name + " "
 	var forAdd string
 	var forModify string
-	var forRename string
+	var forRename []string
 	var forDrop string
 	var fKeys string
 	for _, c := range t.columns {
@@ -167,7 +167,7 @@ func (t *Table) changeTableSQL() string {
 		}
 		t.checkUniqueKey(c)
 		if c.IsWaitingRename() {
-			forRename += c.GetSQL()
+			forRename = append(forRename, base + c.GetSQL())
 			continue
 		}
 		if c.IsWaitingChange() {
@@ -188,9 +188,6 @@ func (t *Table) changeTableSQL() string {
 	if forDrop != "" {
 		forDrop = base + strings.TrimRight(forDrop, ",") + ";"
 	}
-	if forRename != "" {
-		forRename = base + forRename + ";"
-	}
 	if forModify != "" {
 		forModify = base + strings.TrimRight(forModify, ",") + ";"
 	}
@@ -200,7 +197,8 @@ func (t *Table) changeTableSQL() string {
 	if fKeys != "" {
 		fKeys = base + strings.TrimRight(fKeys, ",") + ";"
 	}
-	return forRename + forDrop + forModify + forAdd + fKeys
+	log.Println(strings.Join(forRename, ""))
+	return strings.Join(forRename, "") + forDrop + forModify + forAdd + fKeys
 }
 
 func (t *Table) dropTableSQL() string {
