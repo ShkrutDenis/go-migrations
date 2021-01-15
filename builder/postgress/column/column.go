@@ -178,6 +178,9 @@ func (c *Column) dropColumnSQL() string {
 
 func (c *Column) columnOptionsSQL() string {
 	if c.isPrimaryKey {
+		if strings.ToLower(c.fieldType) == "bigint" {
+			return " bigserial primary key"
+		}
 		return " serial primary key"
 	}
 	sql := " " + c.fieldType
