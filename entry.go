@@ -2,6 +2,7 @@ package go_migrations
 
 import (
 	"flag"
+	"fmt"
 	"github.com/ShkrutDenis/go-migrations/config"
 	"github.com/ShkrutDenis/go-migrations/db"
 	"github.com/ShkrutDenis/go-migrations/model"
@@ -24,13 +25,10 @@ func Run(migs []store.Migratable) {
 		return
 	}
 
-	if !config.GetConfig().FirstRun {
-		ok, m := model.GetLastMigration(connection)
-		if ok {
-			store.FilterMigrations(m.Name)
-		}
+	for _, m := range migs {
+		upOrIgnore(m)
 	}
-	up()
+	CheckExtraMigrations()
 }
 
 func rollBack() {
@@ -38,7 +36,7 @@ func rollBack() {
 	for _, m := range forRollback {
 		forRun := store.FindMigration(m.Name)
 		if forRun == nil {
-			log.Fatal("Migration", m.Name, "not found")
+			log.Fatalf("Migration %s not found", m.Name)
 		}
 		log.Println("Rolling back", forRun.GetName())
 		forRun.Down(connection)
@@ -47,12 +45,24 @@ func rollBack() {
 	model.RemoveLastBatch(connection, config.GetConfig().LastBatch)
 }
 
-func up() {
-	for _, m := range store.GetMigrationsList() {
-		log.Println("Migrating", m.GetName())
-		m.Up(connection)
-		model.AddMigrationRaw(connection, m.GetName(), config.GetConfig().LastBatch+1)
-		log.Println("Migrated", m.GetName())
+func upOrIgnore(migration store.Migratable) {
+	if !config.GetConfig().FirstRun && model.MigrationExist(connection, migration.GetName()) {
+		return
+	}
+	log.Println("Migrating", migration.GetName())
+	migration.Up(connection)
+	model.AddMigrationRaw(connection, migration.GetName(), config.GetConfig().LastBatch+1)
+	log.Println("Migrated", migration.GetName())
+}
+
+func CheckExtraMigrations() {
+	extra := model.GetExtraMigrations(connection, store.GetMigrationsNames())
+	if len(extra) != 0 {
+		logMsg := "Found extra migrations in DB.\nMigrations:"
+		for _, m := range extra {
+			logMsg = fmt.Sprintf("%s\n - %s", logMsg, m.Name)
+		}
+		log.Println(logMsg)
 	}
 }
 

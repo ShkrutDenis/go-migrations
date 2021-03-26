@@ -18,6 +18,14 @@ func GetMigrationsList() []Migratable {
 	return list
 }
 
+func GetMigrationsNames() []string {
+	var names []string
+	for _, m := range list {
+		names = append(names, m.GetName())
+	}
+	return names
+}
+
 func FindMigration(name string) Migratable {
 	for _, m := range list {
 		if m.GetName() == name {

@@ -22,6 +22,20 @@ func CreateMigrationsTable(connection *sqlx.DB) bool {
 	return false
 }
 
+func GetExtraMigrations(connection *sqlx.DB, names []string) []Migration {
+	var list []Migration
+	q, a, e := sqlx.In(checkExtraRawsSQL(), names)
+	if e != nil {
+		panic(e)
+	}
+	q = connection.Rebind(q)
+	e = connection.Select(&list, q, a...)
+	if e != nil {
+		panic(e)
+	}
+	return list
+}
+
 func AddMigrationRaw(connection *sqlx.DB, migration string, lastBatch int) {
 	connection.MustExec(addRawSQL(), migration, lastBatch)
 }
@@ -74,6 +88,17 @@ func checkTableExitSQL() string {
 		return "SELECT * FROM migrations LIMIT 1;"
 	case "postgres":
 		return "SELECT * FROM migrations LIMIT 1;"
+	default:
+		panic("Not supported DB driver: " + os.Getenv("DB_DRIVER"))
+	}
+}
+
+func checkExtraRawsSQL() string {
+	switch os.Getenv("DB_DRIVER") {
+	case "mysql":
+		return "SELECT * FROM migrations WHERE name NOT IN (?);"
+	case "postgres":
+		return "SELECT * FROM migrations WHERE name NOT IN (?);"
 	default:
 		panic("Not supported DB driver: " + os.Getenv("DB_DRIVER"))
 	}
@@ -161,7 +186,7 @@ func removeMigrationSQL() string {
 	case "mysql":
 		return "DELETE FROM migrations WHERE name=$1"
 	case "postgres":
-		return ""
+		return "DELETE FROM migrations WHERE name=$1"
 	default:
 		panic("Not supported DB driver: " + os.Getenv("DB_DRIVER"))
 	}
