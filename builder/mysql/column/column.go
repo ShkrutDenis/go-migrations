@@ -214,6 +214,10 @@ func (c *Column) IsPrimary() bool {
 	return c.isPrimaryKey
 }
 
+func (c *Column) IsAutoIncrement() bool {
+	return c.autoincrement
+}
+
 func (c *Column) IsUnique() bool {
 	return c.unique
 }

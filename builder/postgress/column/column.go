@@ -5,6 +5,7 @@ import (
 	"github.com/ShkrutDenis/go-migrations/builder/contract"
 	"github.com/ShkrutDenis/go-migrations/builder/postgress/info"
 	"github.com/jmoiron/sqlx"
+	"log"
 	"strings"
 )
 
@@ -155,11 +156,13 @@ func (c *Column) changeColumnSQL() string {
 		panic(fmt.Sprintf("Column %v not found. Column name is correct?", c.name))
 	}
 	var sql string
-	sql += fmt.Sprintf("ALTER COLUMN %v DROP DEFAULT,", c.name)
 	if c.fieldType != c.info.GetType() {
-		sql += fmt.Sprintf("ALTER COLUMN %v TYPE %v USING %v::%v,", c.name, c.fieldType, c.name, c.fieldType)
+		sql = fmt.Sprintf("ALTER COLUMN %v TYPE %v USING %v::%v,", c.name, c.fieldType, c.name, c.fieldType)
+		if c.hasDefault {
+			sql = fmt.Sprintf("ALTER COLUMN %v DROP DEFAULT,", c.name) + sql +
+				fmt.Sprintf("ALTER COLUMN %v SET DEFAULT '%v',", c.name, c.defaultValue)
+		}
 	}
-	sql += fmt.Sprintf("ALTER COLUMN %v SET DEFAULT '%v',", c.name, c.defaultValue)
 	if c.info.Nullable() && c.nullable == notNull {
 		sql += fmt.Sprintf("ALTER COLUMN %v SET NOT NULL,", c.name)
 	} else if !c.info.Nullable() && c.nullable == null {
@@ -177,12 +180,6 @@ func (c *Column) dropColumnSQL() string {
 }
 
 func (c *Column) columnOptionsSQL() string {
-	if c.isPrimaryKey {
-		if strings.ToLower(c.fieldType) == "bigint" {
-			return " bigserial primary key"
-		}
-		return " serial primary key"
-	}
 	sql := " " + c.fieldType
 
 	if c.hasDefault {
@@ -196,7 +193,9 @@ func (c *Column) columnOptionsSQL() string {
 }
 
 func (c *Column) columnPositionSQL() string {
-	// TODO:Postgres don`t support positioning
+	if c.first || c.after != "" {
+		log.Println("WARNING: postgres don't support column positioning")
+	}
 	return ""
 }
 
@@ -218,6 +217,10 @@ func (c *Column) GetUniqueKeyName() string {
 
 func (c *Column) IsPrimary() bool {
 	return c.isPrimaryKey
+}
+
+func (c *Column) IsAutoIncrement() bool {
+	return c.autoincrement
 }
 
 func (c *Column) IsUnique() bool {

@@ -19,6 +19,7 @@ type Column interface {
 	GetName() string
 	GetUniqueKeyName() string
 	IsPrimary() bool
+	IsAutoIncrement() bool
 	IsUnique() bool
 	HasUniqueKey() bool
 	NeedUniqueKey() bool

@@ -6,6 +6,7 @@ import (
 	"github.com/ShkrutDenis/go-migrations/builder/postgress/column"
 	"github.com/ShkrutDenis/go-migrations/builder/postgress/info"
 	"github.com/ShkrutDenis/go-migrations/builder/postgress/key"
+	"github.com/ShkrutDenis/go-migrations/builder/postgress/types"
 	"github.com/ShkrutDenis/go-migrations/config"
 	"github.com/jmoiron/sqlx"
 	"log"
@@ -19,6 +20,7 @@ type Table struct {
 
 	foreignKeys []contract.ForeignKey
 	uniqueKeys  []contract.UniqueKey
+	primaryKey  *key.PrimaryKey
 
 	columns    []contract.Column
 	timestamps bool
@@ -30,7 +32,7 @@ type Table struct {
 }
 
 func NewTable(name string, con *sqlx.DB) contract.Table {
-	return &Table{name: name, connect: con.Unsafe()}
+	return &Table{name: name, connect: con.Unsafe(), primaryKey: key.NewPrimaryKey(name)}
 }
 
 func DropTable(name string, con *sqlx.DB) contract.Table {
@@ -38,7 +40,7 @@ func DropTable(name string, con *sqlx.DB) contract.Table {
 }
 
 func ChangeTable(name string, con *sqlx.DB) contract.Table {
-	return &Table{name: name, change: true, connect: con.Unsafe()}
+	return &Table{name: name, change: true, connect: con.Unsafe(), primaryKey: key.NewPrimaryKey(name)}
 }
 
 func RenameTable(oldName, newName string, con *sqlx.DB) contract.Table {
@@ -61,7 +63,7 @@ func (t *Table) String(name string, length int) contract.Column {
 }
 
 func (t *Table) Integer(name string) contract.Column {
-	c := t.Column(name).Type("int")
+	c := t.Column(name).Type(types.INT)
 	return c
 }
 
@@ -137,6 +139,9 @@ func (t *Table) createTableSQL() string {
 	for _, c := range t.columns {
 		sql += c.GetSQL() + ","
 		t.checkUniqueKey(c)
+		if c.IsPrimary() {
+			t.primaryKey.AddColumn(c.GetName(), c.IsAutoIncrement())
+		}
 	}
 	if t.timestamps {
 		sql += t.getTimeStampsSQL() + ","
@@ -150,7 +155,7 @@ func (t *Table) createTableSQL() string {
 		}
 		sql += k.GetSQL() + ","
 	}
-	return strings.TrimRight(sql, ",") + ");"
+	return strings.TrimRight(sql, ",") + ");" + t.primaryKey.GetSQL()
 }
 
 func (t *Table) changeTableSQL() string {
@@ -167,7 +172,7 @@ func (t *Table) changeTableSQL() string {
 		}
 		t.checkUniqueKey(c)
 		if c.IsWaitingRename() {
-			forRename = append(forRename, base + c.GetSQL())
+			forRename = append(forRename, base+c.GetSQL())
 			continue
 		}
 		if c.IsWaitingChange() {
