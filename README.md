@@ -53,9 +53,53 @@ Module uses next variables for creating a connection with DB:
 - DB_PORT
 - DB_NAME
 
-if `DB_HOST` and `DB_PORT` doesn’t exist, will be used a `DB_CONNECTION` with next format: `host:port`
+if `DB_HOST` and `DB_PORT` doesn't exist, will be used a `DB_CONNECTION` with next format: `host:port`
 
 By default, module load env file from the current directory with name `.env`. For use custom env file you can use next flags: `--env-path` and `--env-file`
+
+#### Directly usage
+
+If you need run migrations from your application, then you could use migration engine by next way:
+```go
+    package your_package
+
+    import (
+        gmEngine "github.com/ShkrutDenis/go-migrations/engine"
+        gmConfig "github.com/ShkrutDenis/go-migrations/engine/config"
+        gmStore "github.com/ShkrutDenis/go-migrations/engine/store"
+    )
+
+    func Migrate() {
+        e := gmEngine.NewEngine()
+        e.WithConfig(gmConfig.Config{
+        	Verbose:    true,          // set as true if you want to see additional logs 
+        	IsRollback: false,         // set as true if you want to rollback migrations 
+        	EnvFile:    ".custom.env", // default value is `.env`. If ypu need to override set value here 
+        	EnvPath:    "path",        // default value is empty (current directory). If you need to override set value here
+        })
+        e.Run(getMigrationsList())
+    }
+    
+    func getMigrationsList() []gmStore.Migratable {
+    	return []gmStore.Migratable{
+            // Register you migrations here
+        }
+    }
+```
+
+If you want to use your DB connection instead of the created by library, you could use next way:
+
+```go
+    func Migrate() {
+        e := gmEngine.NewEngine()
+        
+        e.GetConnector().SetConnection() // if you use sql.DB
+        // or
+        e.GetConnector().SetConnectionX() // if you use sqlx.DB
+        
+        e.Run(getMigrationsList())
+    }
+```
 
 ### Documentation
 
