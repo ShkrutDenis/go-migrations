@@ -19,11 +19,11 @@ NewTable() will init a structure for adding a new table.
 
 Signature: 
 
-    NewTable(string, \*sqlx.DB) Table
+    NewTable(string, *sqlx.DB) Table
 
 Arguments: 
 - Name of new table (type string)
-- Pointer to DB connection (type \*sqlx.DB)
+- Pointer to DB connection (type *sqlx.DB)
 
 Return value:
 - [Table](#table-type)
@@ -34,11 +34,11 @@ ChangeTable() will init structure for changing an existing table.
 
 Signature: 
 
-    ChangeTable(string, \*sqlx.DB) Table
+    ChangeTable(string, *sqlx.DB) Table
 
 Arguments: 
 - Name of existing table (type string)
-- Pointer to DB connection (type \*sqlx.DB)
+- Pointer to DB connection (type *sqlx.DB)
 
 Return value:
 - [Table](#table-type)
@@ -49,12 +49,12 @@ RenameTable() will init structure for rename an existing table.
 
 Signature: 
 
-    RenameTable(string, string, \*sqlx.DB) Table
+    RenameTable(string, string, *sqlx.DB) Table
 
 Arguments: 
 - Old name of existing table (type string)
 - New name for existing table (type string)
-- Pointer to DB connection (type \*sqlx.DB)
+- Pointer to DB connection (type *sqlx.DB)
 
 Return value:
 - [Table](#table-type)
@@ -65,11 +65,11 @@ DropTable() will init structure for dropping an existing table.
 
 Signature: 
 
-    DropTable(string, \*sqlx.DB) Table
+    DropTable(string, *sqlx.DB) Table
 
 Arguments: 
 - Name of existing table (type string)
-- Pointer to DB connection (type \*sqlx.DB)
+- Pointer to DB connection (type *sqlx.DB)
 
 Return value:
 - [Table](#table-type)

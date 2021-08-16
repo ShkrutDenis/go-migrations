@@ -6,7 +6,7 @@ import (
 	"github.com/ShkrutDenis/go-migrations/builder/postgress/column"
 	"github.com/ShkrutDenis/go-migrations/builder/postgress/info"
 	"github.com/ShkrutDenis/go-migrations/builder/postgress/key"
-	"github.com/ShkrutDenis/go-migrations/config"
+	"github.com/ShkrutDenis/go-migrations/engine/config"
 	"github.com/jmoiron/sqlx"
 	"log"
 	"strconv"
@@ -216,7 +216,7 @@ func (t *Table) Exec() error {
 		if i == len(queries) {
 			break
 		}
-		if config.GetConfig().Verbose {
+		if config.Verbose {
 			log.Println(q + ";")
 		}
 		_, err := t.connect.Exec(q + ";")
@@ -240,7 +240,7 @@ func (t *Table) MustExec() {
 		if q == "" {
 			break
 		}
-		if config.GetConfig().Verbose {
+		if config.Verbose {
 			log.Println(q + ";")
 		}
 		t.connect.MustExec(q + ";")

@@ -1,13 +1,15 @@
 package main
 
 import (
-	gm "github.com/ShkrutDenis/go-migrations"
-	gmStore "github.com/ShkrutDenis/go-migrations/store"
+	gmEngine "github.com/ShkrutDenis/go-migrations/engine"
+	gmStore "github.com/ShkrutDenis/go-migrations/engine/store"
 	"github.com/ShkrutDenis/go-migrations/template/migrations/list"
 )
 
 func main() {
-	gm.Run(getMigrationsList())
+	e := gmEngine.NewEngine()
+	e.Run(getMigrationsList())
+	e.GetConnector().Close()
 }
 
 func getMigrationsList() []gmStore.Migratable {

@@ -147,33 +147,37 @@ func (c *Column) GetSQL() string {
 }
 
 func (c *Column) addColumnSQL() string {
-	return c.name + c.columnOptionsSQL() + c.columnPositionSQL()
+	return fmt.Sprintf("\"%s\"%s%s", c.name, c.columnOptionsSQL(), c.columnPositionSQL())
 }
 
 func (c *Column) changeColumnSQL() string {
 	if c.info == nil {
-		panic(fmt.Sprintf("Column %v not found. Column name is correct?", c.name))
+		panic(fmt.Sprintf("Column %s not found. Column name is correct?", c.name))
 	}
 	var sql string
-	sql += fmt.Sprintf("ALTER COLUMN %v DROP DEFAULT,", c.name)
-	if c.fieldType != c.info.GetType() {
-		sql += fmt.Sprintf("ALTER COLUMN %v TYPE %v USING %v::%v,", c.name, c.fieldType, c.name, c.fieldType)
+	if c.hasDefault {
+		sql += fmt.Sprintf("ALTER COLUMN \"%s\" DROP DEFAULT,", c.name)
 	}
-	sql += fmt.Sprintf("ALTER COLUMN %v SET DEFAULT '%v',", c.name, c.defaultValue)
+	if c.fieldType != c.info.GetType() {
+		sql += fmt.Sprintf("ALTER COLUMN \"%s\" TYPE %v USING \"%s\"::%v,", c.name, c.fieldType, c.name, c.fieldType)
+	}
+	if c.hasDefault {
+		sql += fmt.Sprintf("ALTER COLUMN \"%s\" SET DEFAULT '%v',", c.name, c.defaultValue)
+	}
 	if c.info.Nullable() && c.nullable == notNull {
-		sql += fmt.Sprintf("ALTER COLUMN %v SET NOT NULL,", c.name)
+		sql += fmt.Sprintf("ALTER COLUMN \"%s\" SET NOT NULL,", c.name)
 	} else if !c.info.Nullable() && c.nullable == null {
-		sql += fmt.Sprintf("ALTER COLUMN %v DROP NOT NULL,", c.name)
+		sql += fmt.Sprintf("ALTER COLUMN \"%s\" DROP NOT NULL,", c.name)
 	}
 	return strings.TrimRight(sql, ",")
 }
 
 func (c *Column) renameColumnSQL() string {
-	return fmt.Sprintf("rename column %v to %v;", c.name, c.rename)
+	return fmt.Sprintf("rename column \"%s\" to \"%s\";", c.name, c.rename)
 }
 
 func (c *Column) dropColumnSQL() string {
-	return fmt.Sprintf("drop column %v,", c.name)
+	return fmt.Sprintf("drop column \"%s\",", c.name)
 }
 
 func (c *Column) columnOptionsSQL() string {

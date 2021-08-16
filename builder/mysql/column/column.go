@@ -146,22 +146,22 @@ func (c *Column) GetSQL() string {
 }
 
 func (c *Column) addColumnSQL() string {
-	return c.name + c.columnOptionsSQL() + c.columnPositionSQL()
+	return fmt.Sprintf("\"%s\"%s%s", c.name, c.columnOptionsSQL(), c.columnPositionSQL())
 }
 
 func (c *Column) changeColumnSQL() string {
-	sql := fmt.Sprintf("modify column %v", c.name)
+	sql := fmt.Sprintf("modify column \"%s\"", c.name)
 	sql += c.columnOptionsSQL()
 	sql += c.columnPositionSQL()
 	return sql
 }
 
 func (c *Column) renameColumnSQL() string {
-	return fmt.Sprintf("change column %v %v;", c.name, c.rename)
+	return fmt.Sprintf("change column \"%s\" \"%s\";", c.name, c.rename)
 }
 
 func (c *Column) dropColumnSQL() string {
-	return fmt.Sprintf("drop column %v,", c.name)
+	return fmt.Sprintf("drop column \"%s\",", c.name)
 }
 
 func (c *Column) columnOptionsSQL() string {
