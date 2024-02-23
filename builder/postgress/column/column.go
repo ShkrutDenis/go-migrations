@@ -2,10 +2,11 @@ package column
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/ShkrutDenis/go-migrations/builder/contract"
 	"github.com/ShkrutDenis/go-migrations/builder/postgress/info"
 	"github.com/jmoiron/sqlx"
-	"strings"
 )
 
 const (
@@ -190,7 +191,11 @@ func (c *Column) columnOptionsSQL() string {
 	sql := " " + c.fieldType
 
 	if c.hasDefault {
-		sql += fmt.Sprintf(" default '%v'", c.defaultValue)
+		if string(c.defaultValue[len(c.defaultValue)-1:]) == ")" {
+			sql += fmt.Sprintf(" default %v", c.defaultValue)
+		} else {
+			sql += fmt.Sprintf(" default '%v'", c.defaultValue)
+		}
 	}
 	if c.nullable == "" {
 		c.nullable = notNull
