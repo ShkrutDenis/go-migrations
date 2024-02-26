@@ -2,10 +2,11 @@ package column
 
 import (
 	"fmt"
+	"strings"
+
 	"github.com/ShkrutDenis/go-migrations/builder/contract"
 	"github.com/ShkrutDenis/go-migrations/builder/postgress/info"
 	"github.com/jmoiron/sqlx"
-	"strings"
 )
 
 const (
@@ -181,21 +182,30 @@ func (c *Column) dropColumnSQL() string {
 }
 
 func (c *Column) columnOptionsSQL() string {
-	if c.isPrimaryKey {
-		if strings.ToLower(c.fieldType) == "bigint" {
-			return " bigserial primary key"
-		}
-		return " serial primary key"
-	}
 	sql := " " + c.fieldType
 
-	if c.hasDefault {
-		sql += fmt.Sprintf(" default '%v'", c.defaultValue)
-	}
 	if c.nullable == "" {
 		c.nullable = notNull
 	}
 	sql += " " + c.nullable
+
+	if c.hasDefault {
+		if string(c.defaultValue[len(c.defaultValue)-1:]) == ")" {
+			sql += fmt.Sprintf(" DEFAULT %v", c.defaultValue)
+		} else {
+			sql += fmt.Sprintf(" DEFAULT '%v'", c.defaultValue)
+		}
+	}
+
+	if c.isPrimaryKey {
+		if strings.ToLower(c.fieldType) == "bigint" {
+			return " BIGSERIAL PRIMARY KEY"
+		} else if strings.Contains(c.fieldType, "int") {
+			return " SERIAL PRIMARY KEY"
+		}
+		sql += " PRIMARY KEY"
+	}
+
 	return sql
 }
 
